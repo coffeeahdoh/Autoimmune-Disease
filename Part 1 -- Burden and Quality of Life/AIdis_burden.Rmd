@@ -11,7 +11,16 @@ desciption: "3 questions: 1. Is there a difference in quality of life (QoL) betw
 ## PROJECT DESCRIPTION
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(include = TRUE, echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r working directory, include = FALSE}
+
+getwd()
+setwd(getwd())
+
+getwd()
+
 ```
 
 ```{r packages, include = FALSE}
@@ -21,13 +30,14 @@ library(readxl, quietly = TRUE)
 library(dplyr, quietly = TRUE)
 library(tidyr, quietly = TRUE)
 library(ggplot2, quietly = TRUE)
+library(RColorBrewer, quietly = TRUE)
 ```
 
 ## DATASET DESCRIPTION
 ##### CITATION
 
 ```{r load excel, include = FALSE}
-AIdata_raw <- read_xlsx("~/Downloads/2_Data_AI-patients.xlsx", sheet = 1)
+AIdata_raw <- read_xlsx("2_Data_AI-patients.xlsx", sheet = 1)
 head(AIdata_raw)
 str(AIdata_raw)
 summary(AIdata_raw)
@@ -36,12 +46,13 @@ summary(AIdata_raw)
 ```{r cleaning, include = FALSE}
 
 AIdata_clean <- AIdata_raw %>% 
-                  mutate(Recruitment = as.factor(Recruitment),
-                         Gender = as.factor(ifelse(Gender == 2, 0, 1)),
-                         Education = as.factor(Education),
-                         `Marital status` = as.factor(`Marital status`)) %>%
-                  na_if(-9)
-summary(AIdata_clean)
+                  mutate(Gender = as.factor(ifelse(Gender == 2, 0, 1)), #change to standard coding (M = 0, F = 1)
+                         Recruitment = as.factor(Recruitment), #change to categorical
+                         Education = as.factor(Education), #change to categorical
+                         `Marital status` = as.factor(`Marital status`)) %>% #change to categorical
+                  mutate(Gender = factor(Gender, labels = c("Male", "Female"))) %>%
+                  na_if(-9) #replace -9 w/ NA
+summary(AIdata_clean$Gender)
 
 ```
 
@@ -49,7 +60,7 @@ summary(AIdata_clean)
 ## PRELIM DA
 
 ```{r functions}
-
+#function to generate histogram
 plot_histogram <- function(column, fill = NULL, position = "identity"){
   ggplot(AIdata_clean) +
     geom_histogram(aes({{column}}, fill = {{fill}}),
@@ -57,6 +68,7 @@ plot_histogram <- function(column, fill = NULL, position = "identity"){
                    alpha= 0.75)
 }
 
+#function to generate bar plot
 plot_bar <- function(column, fill = NULL, position = "identity"){
   ggplot(AIdata_clean, ) +
     geom_bar(aes({{column}}, fill = {{fill}}),
@@ -69,23 +81,28 @@ plot_bar <- function(column, fill = NULL, position = "identity"){
 ```{r exploratory}
 
 plot_histogram(Age, Gender) +
-  labs(title = "Age Distribution", x = "Age", y = "Count")
+  facet_wrap(~Gender) +
+  labs(title = "Age Distribution by Gender", x = "Age", y = "Count") +
+  scale_fill_brewer(palette = "Accent") 
 
-plot_bar(`AI (number)`)
+plot_bar(`AI (number)`, Gender) +
+  facet_wrap(~Gender)
 
-```
+plot_histogram(`Burden of symptoms`, Gender) +
+  facet_wrap(~Gender)
 
-## PERSONAL DA
-
-```{r Q1 data viz, include = TRUE}
-ggplot(AIdata_raw, aes(x = as.factor(Gender), y = `Burden of symptoms`, fill=as.factor(Gender))) +
+ggplot(AIdata_clean, aes(x = Gender, y = `Burden of symptoms`, fill=Gender)) +
   geom_boxplot(alpha = 0.5)
 
-plot_histogram(`Burden of therapies`, Gender, "dodge")
+plot_histogram(`Burden of therapies`, Gender, "dodge") +
+  facet_wrap(~Gender)
 
-plot_histogram(`EQ-Index score`, Gender)
+plot_histogram(`EQ-Index score`, Gender) +
+  facet_wrap(~Gender)
 
-plot_histogram(`EQ-VAS score`, Gender)
+plot_histogram(`EQ-VAS score`, Gender) +
+  facet_wrap(~Gender)
+
 ```
 
 
