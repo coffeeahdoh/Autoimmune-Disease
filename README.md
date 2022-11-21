@@ -6,8 +6,7 @@ The intention of this project is to analyze various publicly available
 datasets related to Autoimmune Diseases (AI), including burden, quality of 
 life, and genetics/genomics.
 
-The analyses within are exploratory and may only pertain 
-to particular cohorts.
+** The analyses herein may only pertain to particular groups. **
 
 ## Part 1
 
