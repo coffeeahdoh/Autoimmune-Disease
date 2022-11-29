@@ -61,11 +61,12 @@ summary(AIdata_clean$Gender)
 
 ```{r functions}
 #function to generate histogram
-plot_histogram <- function(column, fill = NULL, position = "identity"){
-  ggplot(AIdata_clean) +
-    geom_histogram(aes({{column}}, fill = {{fill}}),
-                   position = position, 
-                   alpha= 0.75)
+plot_hist_dens <- function(column, factor = NULL, binwidth = 30){
+  ggplot(AIdata_clean, aes(x = {{column}})) +
+    geom_histogram(aes(y = ..count.., fill = {{factor}}),
+                   alpha= 0.40,
+                   binwidth = binwidth) +
+    geom_density(aes(y = binwidth * ..count.., color = {{factor}}))
 }
 
 #function to generate bar plot
@@ -80,27 +81,41 @@ plot_bar <- function(column, fill = NULL, position = "identity"){
 
 ```{r exploratory}
 
-plot_histogram(Age, Gender) +
+ggplot(AIdata_clean, aes(x = Age)) +
+  geom_histogram(aes(y = ..count.., fill = Gender),
+                   position = "identity", 
+                   alpha = 0.5,
+                   binwidth = 5) +
+  geom_density(aes(y = 5 * ..count.., color = Gender),
+               alpha = 1.2) +
   facet_wrap(~Gender) +
   labs(title = "Age Distribution by Gender", x = "Age", y = "Count") +
-  scale_fill_brewer(palette = "Accent") 
+  scale_fill_brewer(palette = "Accent") +
+  scale_color_brewer(palette = "Accent")
+
+plot_hist_dens(Age, Gender, 5) +
+  facet_wrap(~Gender) +
+  labs(title = "Age Distribution by Gender", x = "Age", y = "Count") +
+  scale_fill_brewer(palette = "Accent") +
+  scale_color_brewer(palette = "Accent")
 
 plot_bar(`AI (number)`, Gender) +
+  geom_density(aes(`AI (number)`)) +
   facet_wrap(~Gender)
 
-plot_histogram(`Burden of symptoms`, Gender) +
+plot_hist_dens(`Burden of symptoms`, Gender, 10) +
   facet_wrap(~Gender)
 
 ggplot(AIdata_clean, aes(x = Gender, y = `Burden of symptoms`, fill=Gender)) +
   geom_boxplot(alpha = 0.5)
 
-plot_histogram(`Burden of therapies`, Gender, "dodge") +
+plot_hist_dens(`Burden of therapies`, Gender, 10) +
   facet_wrap(~Gender)
 
-plot_histogram(`EQ-Index score`, Gender) +
+plot_hist_dens(`EQ-Index score`, Gender, 0.1) +
   facet_wrap(~Gender)
 
-plot_histogram(`EQ-VAS score`, Gender) +
+plot_hist_dens(`EQ-VAS score`, Gender, 10) +
   facet_wrap(~Gender)
 
 ```
