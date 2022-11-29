@@ -1,5 +1,5 @@
 ---
-title: "Burden of Autoimmune Disease"
+title: "Burden of Autoimmune Disease (Part 1)"
 author: "MichaelAngelo Confiado"
 date: "2022-11-19"
 output: html_document
@@ -7,8 +7,6 @@ desciption: "3 questions: 1. Is there a difference in quality of life (QoL) betw
                           2. Does AI QoL generally improve over time? (Measured from time of onset)
                           3. Which age group has the highest burden of therapy? Is it significant?"
 ---
-
-## PROJECT DESCRIPTION
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(include = TRUE, echo = FALSE, warning = FALSE, message = FALSE)
@@ -33,9 +31,6 @@ library(ggplot2, quietly = TRUE)
 library(RColorBrewer, quietly = TRUE)
 ```
 
-## DATASET DESCRIPTION
-##### CITATION
-
 ```{r load excel, include = FALSE}
 AIdata_raw <- read_xlsx("2_Data_AI-patients.xlsx", sheet = 1)
 head(AIdata_raw)
@@ -56,67 +51,63 @@ summary(AIdata_clean$Gender)
 
 ```
 
-
-## PRELIM DA
-
-```{r functions}
+```{r functions, include = FALSE}
 #function to generate histogram
-plot_hist_dens <- function(column, factor = NULL, binwidth = 30){
-  ggplot(AIdata_clean, aes(x = {{column}})) +
-    geom_histogram(aes(y = ..count.., fill = {{factor}}),
+plot_hist_dens <- function(col, fac = NULL, bw = 30, pal = "Accent"){
+  ggplot(AIdata_clean, aes(x = {{col}})) +
+    geom_histogram(aes(y = ..count.., fill = {{fac}}),
                    alpha= 0.40,
-                   binwidth = binwidth) +
-    geom_density(aes(y = binwidth * ..count.., color = {{factor}}))
+                   binwidth = bw) +
+    geom_density(aes(y = bw * ..count.., color = {{fac}})) +
+    facet_wrap(vars({{fac}})) +
+    scale_fill_brewer(palette = pal) +
+    scale_color_brewer(palette = pal)
 }
 
 #function to generate bar plot
-plot_bar <- function(column, fill = NULL, position = "identity"){
+plot_bar <- function(col, fac = NULL, pal = "Accent"){
   ggplot(AIdata_clean, ) +
-    geom_bar(aes({{column}}, fill = {{fill}}),
-             position = position, 
-             alpha = 0.75)
+    geom_bar(aes({{col}}, fill = {{fac}}),
+             alpha = 0.75) +
+    facet_wrap(vars({{fac}})) +
+    scale_fill_brewer(palette = pal) +
+    scale_color_brewer(palette = pal)
 }
 
 ```
 
+## INTRODUCTION
+
+## DATASET DESCRIPTION
+##### CITATION
+
+## PRELIM DA
+
 ```{r exploratory}
 
-ggplot(AIdata_clean, aes(x = Age)) +
-  geom_histogram(aes(y = ..count.., fill = Gender),
-                   position = "identity", 
-                   alpha = 0.5,
-                   binwidth = 5) +
-  geom_density(aes(y = 5 * ..count.., color = Gender),
-               alpha = 1.2) +
-  facet_wrap(~Gender) +
-  labs(title = "Age Distribution by Gender", x = "Age", y = "Count") +
-  scale_fill_brewer(palette = "Accent") +
-  scale_color_brewer(palette = "Accent")
-
 plot_hist_dens(Age, Gender, 5) +
-  facet_wrap(~Gender) +
-  labs(title = "Age Distribution by Gender", x = "Age", y = "Count") +
-  scale_fill_brewer(palette = "Accent") +
-  scale_color_brewer(palette = "Accent")
+  labs(title = "Age Distribution", x = "Age", y = "Count")
 
 plot_bar(`AI (number)`, Gender) +
-  geom_density(aes(`AI (number)`)) +
-  facet_wrap(~Gender)
+  labs(title = "Number of AI disease", x = "Number", y = "Count")
 
 plot_hist_dens(`Burden of symptoms`, Gender, 10) +
-  facet_wrap(~Gender)
+  labs(title = "Burden of Symptoms", x = "Score", y = "Count")
 
 ggplot(AIdata_clean, aes(x = Gender, y = `Burden of symptoms`, fill=Gender)) +
-  geom_boxplot(alpha = 0.5)
+  geom_boxplot(alpha = 0.5) +
+  scale_fill_brewer(palette = "Accent") +
+  scale_color_brewer(palette = "Accent") +
+  labs(title = "Burden of Symptoms", x = "", y = "Score")
 
 plot_hist_dens(`Burden of therapies`, Gender, 10) +
-  facet_wrap(~Gender)
+  labs(title = "Burden of Therapies", x = "Score", y = "Count")
 
 plot_hist_dens(`EQ-Index score`, Gender, 0.1) +
-  facet_wrap(~Gender)
+  labs(title = "EQ-Index scare", x = "Score", y = "Count")
 
 plot_hist_dens(`EQ-VAS score`, Gender, 10) +
-  facet_wrap(~Gender)
+  labs(title = "EQ-VAS score", x = "Score", y = "Count")
 
 ```
 
